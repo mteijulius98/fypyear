@@ -61,4 +61,15 @@ class UserController extends Controller
         
         
 }
+public function getUsers(){
+    $users = User::select('firstname','lastname','email','station_name','role')
+    ->where('role','=','deo')
+    ->orWhere('role', 'weo')
+    ->orWhere('role', 'hos')
+    ->get();
+     $response = [
+         'users' => $users
+     ];
+    return response()->json($response, 200);
+   }
 }

@@ -34,3 +34,6 @@ Route::post('/ward',[
 Route::post('/school',[
         'uses' => 'SchoolController@postSchool'
     ]);
+Route::get('/ausers',[
+      'uses' => 'UserController@getUsers'
+    ]);
