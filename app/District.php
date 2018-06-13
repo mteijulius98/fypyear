@@ -7,12 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class District extends Model
 {
     public $timestamps = false;
-    public function  user(){
-        return $this->hasOne('App\User');
+    public function  region(){
+        return $this->hasMany('App\Region');
     }
-    public function  ward(){
-        return $this->hasMany('App\Ward');
+
+    public function users(){
+        return $this->belongsToMany('App\User');
     }
-    
-    
 }

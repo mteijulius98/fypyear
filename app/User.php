@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'firstname','lastname', 'email', 'password','station_name','role',
+        'fname','mname','lname' ,'email', 'password','role_id'
     ];
 
     /**
@@ -27,14 +27,20 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
     public $timestamps = false;
-    public function user_Sc(){
-        return $this->belongsTo(School::class);
+
+    public function role(){
+        return $this->belongsTo('App\Role');
     }
-    public function user_Dc(){
-        return $this->belongsTo('App\District');
+
+    public function schools(){
+        return $this->belongsToMany('App\School');
     }
-    public function user_Wd(){
-        return $this->belongsTo('App\Ward');
+
+    public function districts(){
+        return $this->belongsToMany('App\District');
+    }
+    public function wards(){
+        return $this->belongsToMany('App\Ward');
     }
 }
 
