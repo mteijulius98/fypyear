@@ -42,5 +42,8 @@ class User extends Authenticatable
     public function wards(){
         return $this->belongsToMany('App\Ward');
     }
+     public function infrastructure(){
+        return $this->hasMany('App\Infrastructure');
+    }
 }
 

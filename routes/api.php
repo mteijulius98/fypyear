@@ -83,14 +83,23 @@ Route::post('/ownership',[
 Route::post('/class',[
         'uses' => 'SchoolController@addClass'
       ]);
+Route::get('/classes',[
+        'uses' => 'SchoolController@getClasses'
+      ]);
 Route::post('/incategory',[
         'uses' => 'SchoolController@addIncategory'
       ]);
 Route::post('/tlmcategory',[
         'uses' => 'SchoolController@addTlmcategory'
       ]);
+Route::get('/tlmcategories',[
+        'uses' => 'SchoolController@getTlcategory'
+      ]);
 Route::post('/tlmaterial',[
         'uses' => 'SchoolController@addTlmaterial'
+      ]);
+Route::get('/tlmaterials',[
+        'uses' => 'SchoolController@getTlm'
       ]);
       Route::post('/equipment',[
         'uses' => 'SchoolController@addEquipment'
@@ -102,12 +111,33 @@ Route::post('/tlmaterial',[
       Route::post('/eqcategory',[
         'uses' => 'SchoolController@addEqcategory'
       ]);
+      Route::get('/eqcategories',[
+        'uses' => 'SchoolController@getEqcategory'
+      ]);
       Route::post('/infrastructure',[
         'uses' => 'SchoolController@addInfrastructure'
       ]);
+      Route::get('/icategories',[
+        'uses' => 'SchoolController@getIcategory'
+      ]);
+      Route::get('/infrastructures',[
+        'uses' => 'SchoolController@getInfrastructure'
+      ]);
+Route::post('/revenue',[
+        'uses' => 'SchoolController@addRevenue'
+      ]);
+Route::post('/ntstaff',[
+        'uses' => 'SchoolController@addNtstaff'
+      ]);
+Route::post('/teacher',[
+        'uses' => 'SchoolController@addTeacher'
+      ]);
+Route::get('/teachers',[
+        'uses' => 'SchoolController@getTeachers'
+    ]);
 
-Route::get('/sdetails',[
-        'uses' => 'SdetailController@getSdetails'
+Route::get('/ntstaffs',[
+        'uses' => 'SchoolController@getNtstaffs'
       ]);
 Route::get('/wards',[
         'uses' => 'WardController@getWards'

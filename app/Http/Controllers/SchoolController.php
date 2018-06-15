@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use JWTAuth;
+use JWTAuthException;
 use App\Scategory;
 use App\Sownership;
 use App\Sdisability;
@@ -15,6 +17,10 @@ use App\Equipment;
 use App\Infrastructure;
 use App\Tlmaterial;
 use App\Service;
+use App\User;
+use App\Revenue;
+use App\Ntstaff;
+use App\Teacher;
 use DB;
 class SchoolController extends Controller
    {
@@ -30,6 +36,7 @@ class SchoolController extends Controller
         $scategory ->name = $request->input('name');
         $scategory ->save();
         return response()->json(['scategory'=>$scategory], 201);
+
 
     }
     public function addDisability(Request $request){
@@ -68,43 +75,130 @@ class SchoolController extends Controller
 
     }
 public function addInfrastructure(Request $request){
-        $infrastructure = new Infrastructure();
-        $infrastructure ->name = $request->input('name');
-        $infrastructure ->available = $request->input('available');
-        $infrastructure ->needed = $request->input('needed');
-        $infrastructure ->icategory_id = $request->input('icategory_id');
-        $infrastructure ->save();
-        return response()->json(['infrastructure'=>$infrastructure], 201);
+      if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+      }
+        $i = new Infrastructure();
+        $i ->name = $request->input('name');
+        $i ->available = $request->input('available');
+        $i ->needed = $request->input('needed');
+        $i ->icategory_id = $request->input('icategory_id');
+        $i ->user_id=auth()->user()->id;
+        $i ->school_id=School::select('schools.id')
+        ->join('school_user','schools.id', '=', 'school_user.school_id')
+        ->where('user_id','=',auth()->user()->id)->get()->first()->id;
+        $i ->save();
+        $infrastructure=Infrastructure::find($i->id);
+        $infrastructure->schools()->attach(School::select('schools.id')
+        ->join('school_user','schools.id', '=', 'school_user.school_id')
+        ->where('user_id','=',auth()->user()->id)->get()->first()->id); 
+        return response()->json(['i'=>$i], 201);
 
     }
 public function addTlmaterial(Request $request){
+  if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+      }
         $tlmaterial = new Tlmaterial();
         $tlmaterial ->name = $request->input('name');
         $tlmaterial ->tlmcategory_id = $request->input('tlmcategory_id');
         $tlmaterial ->sclass_id = $request->input('sclass_id');
         $tlmaterial ->available = $request->input('available');
+        $tlmaterial ->user_id=auth()->user()->id;
+        $tlmaterial ->school_id=School::select('schools.id')
+        ->join('school_user','schools.id', '=', 'school_user.school_id')
+        ->where('user_id','=',auth()->user()->id)->get()->first()->id;
         $tlmaterial ->save();
         return response()->json(['tlmaterial'=>$tlmaterial], 201);
 
     }
     public function addEquipment(Request $request){
+         if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
         $equipment = new Equipment();
         $equipment ->name = $request->input('name');
         $equipment ->eqcategory_id = $request->input('eqcategory_id');
         $equipment ->sclass_id = $request->input('sclass_id');
         $equipment ->available = $request->input('available');
+        $equipment ->user_id=auth()->user()->id;
+        $equipment ->school_id=School::select('schools.id')
+        ->join('school_user','schools.id', '=', 'school_user.school_id')
+        ->where('user_id','=',auth()->user()->id)->get()->first()->id;
         $equipment ->save();
         return response()->json(['equipment'=>$equipment], 201);
 
     }
     public function addService(Request $request){
-        $service = new Service();
-        $service ->name = $request->input('name');
-        $service ->availability = $request->input('availability');
-        $service ->save();
-        return response()->json(['service'=>$service], 201);
+         if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
+        $s = new Service();
+        $s ->name = $request->input('name');
+        $s ->availability = $request->input('availability');
+        $s ->user_id=auth()->user()->id;
+        $s ->school_id=School::select('schools.id')
+        ->join('school_user','schools.id', '=', 'school_user.school_id')
+        ->where('user_id','=',auth()->user()->id)->get()->first()->id;
+        $s ->save();
+        $service=Service::find($s->id);
+        $service->schools()->attach(School::select('schools.id')
+        ->join('school_user','schools.id', '=', 'school_user.school_id')
+        ->where('user_id','=',auth()->user()->id)->get()->first()->id); 
+        return response()->json(['s'=>$s], 201);
+        }
 
+         public function addRevenue(Request $request){
+             if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
+        $revenue = new Revenue();
+        $revenue ->source = $request->input('source');
+        $revenue ->amount = $request->input('amount');
+        $revenue ->kuanzia = $request->input('kuanzia');
+        $revenue ->mpaka = $request->input('mpaka');
+        $revenue ->user_id=auth()->user()->id;
+        $revenue ->school_id=School::select('schools.id')
+        ->join('school_user','schools.id', '=', 'school_user.school_id')
+        ->where('user_id','=',auth()->user()->id)->get()->first()->id;
+        $revenue ->save();
+        return response()->json(['revenue'=>$revenue], 201);
     }
+    public function addNtstaff(Request $request){
+        if(! $user =JWTAuth::parseToken()->authenticate()){
+   return response()->json(['message'=>'user not found'],404);
+       }
+   $ntstaff = new NtStaff();
+   $ntstaff ->designation = $request->input('designation');
+   $ntstaff ->count = $request->input('count');
+   $ntstaff ->user_id=auth()->user()->id;
+   $ntstaff ->school_id=School::select('schools.id')
+   ->join('school_user','schools.id', '=', 'school_user.school_id')
+   ->where('user_id','=',auth()->user()->id)->get()->first()->id;
+   $ntstaff ->save();
+   return response()->json(['ntstaff'=>$ntstaff], 201);
+}
+public function addTeacher(Request $request){
+    if(! $user =JWTAuth::parseToken()->authenticate()){
+return response()->json(['message'=>'user not found'],404);
+   }
+$teacher = new Teacher();
+$teacher ->fname = $request->input('fname');
+$teacher ->mname = $request->input('mname');
+$teacher ->lname = $request->input('lname');
+$teacher ->sex = $request->input('sex');
+$teacher ->birth = $request->input('birth');
+$teacher ->edlevel = $request->input('edlevel');
+$teacher ->epdate = $request->input('epdate');
+$teacher ->epid = $request->input('epid');
+$teacher ->user_id=auth()->user()->id;
+$teacher ->school_id=School::select('schools.id')
+->join('school_user','schools.id', '=', 'school_user.school_id')
+->where('user_id','=',auth()->user()->id)->get()->first()->id;
+$teacher ->save();
+return response()->json(['teacher'=>$teacher], 201);
+}
+
     public function addSchool(Request $request){
         $school = new School();
         $school ->name = $request->input('name');
@@ -120,7 +214,7 @@ public function addTlmaterial(Request $request){
         return response()->json(['school'=>$school], 201);
 
     }
-     public function getSchools(){
+    public function getSchools(){
     $schools=DB::table('schools')->select('name','regno','wards.wname')
     ->join('wards','schools.ward_id', '=', 'wards.id')
     ->get();
@@ -128,7 +222,7 @@ public function addTlmaterial(Request $request){
          'schools' => $schools
      ];
     return response()->json($response, 200);
-   }
+    }
  public function getCategory(){
     $categories = Scategory::select('id','name')
     ->get();
@@ -145,4 +239,89 @@ public function getOwnership(){
      ];
     return response()->json($response, 200);
 }
+public function getIcategory(){
+    $icategories = Icategory::select('id','name')
+    ->get();
+     $response = [
+         'icategories' => $icategories
+     ];
+    return response()->json($response, 200);
+}
+public function getTlcategory(){
+    $tlmcategories = Tlmcategory::select('id','name')
+    ->get();
+     $response = [
+         'tlmcategories' => $tlmcategories
+     ];
+    return response()->json($response, 200);
+}
+public function getClasses(){
+    $sclasses = Sclass::select('id','name')
+    ->get();
+     $response = [
+         'sclasses' => $sclasses
+     ];
+    return response()->json($response, 200);
+}
+public function getEqcategory(){
+    $eqcategories = Eqcategory::select('id','name')
+    ->get();
+     $response = [
+         'eqcategories' => $eqcategories
+     ];
+    return response()->json($response, 200);
+}
+public function getTeachers(){
+    $teachers = Teacher::select('id','fname','lname')
+    ->get();
+     $response = [
+         'teachers' => $teachers
+     ];
+    return response()->json($response, 200);
+}
+public function getNtstaffs(){
+    $ntstaffs = Ntstaff::select('id','designation','count')
+    ->get();
+     $response = [
+         'ntstaffs' => $ntstaffs
+     ];
+    return response()->json($response, 200);
+}
+public function getInfrastructure(){
+     if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
+   // if(auth()->user()->id == Infrastructure::select('user_id')
+   //  ->get()){
+
+    $infrastructures =Infrastructure::select('infrastructures.name AS Name','icategories.name AS category','available','needed')
+    ->join('icategories','infrastructures.icategory_id', '=', 'icategories.id')
+    ->get();
+
+     $response = [
+         'infrastructures' => $infrastructures
+     ];
+    return response()->json($response, 200);
+   // }  
+}
+public function getTlm(){
+     // if(! $user =JWTAuth::parseToken()->authenticate()){
+     //    return response()->json(['message'=>'user not found'],404);
+     //        }
+   // if(auth()->user()->id == Infrastructure::select('user_id')
+   //  ->get()){
+
+    $tlmaterials =Tlmaterial::select('tlmaterials.name AS Name','tlmcategories.name AS category','available','sclasses.name AS ClassName')
+    ->join('tlmcategories','tlmaterials.tlmcategory_id', '=', 'tlmcategories.id')
+     ->join('sclasses','tlmaterials.sclass_id', '=', 'sclasses.id')
+    ->get();
+
+     $response = [
+         'tlmaterials' => $tlmaterials
+     ];
+    return response()->json($response, 200);
+   // }  
+}
+
+
 }
