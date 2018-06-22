@@ -19,8 +19,21 @@ Route::post('/district',[
     'uses' => 'DistrictController@postDistrict'
 
     ]);
+Route::delete('/role/{id}',[
+    'uses' => 'RoleController@deleteRole'
+
+    ]);
+Route::delete('/user/{id}',[
+    'uses' => 'UserController@deleteUser'
+    ]);
+Route::put('/user/{id}',[
+    'uses' => 'UserController@putUser'
+    ]);
+Route::put('/role/{id}',[
+    'uses' => 'RoleController@putRole'
+    ]);
 Route::post('/school',[
-        'uses' => 'SchoolController@addSchool'
+  'uses' => 'SchoolController@addSchool'
     
         ]);
 Route::get('/schools',[
@@ -80,9 +93,20 @@ Route::post('/ownership',[
  Route::post('/disability',[
         'uses' => 'SchoolController@addDisability'
       ]);
+Route::post('/reason',[
+        'uses' => 'SchoolController@addDreason'
+      ]);
+Route::post('/subject',[
+        'uses' => 'SchoolController@addSubject'
+      ]);
+
 Route::post('/class',[
         'uses' => 'SchoolController@addClass'
       ]);
+Route::get('/equipments',[
+        'uses' => 'SchoolController@getEquipments'
+      ]);
+
 Route::get('/classes',[
         'uses' => 'SchoolController@getClasses'
       ]);
@@ -97,6 +121,9 @@ Route::get('/tlmcategories',[
       ]);
 Route::post('/tlmaterial',[
         'uses' => 'SchoolController@addTlmaterial'
+      ]);
+Route::post('/expenditure',[
+        'uses' => 'SchoolController@addExpenditure'
       ]);
 Route::get('/tlmaterials',[
         'uses' => 'SchoolController@getTlm'
@@ -119,6 +146,12 @@ Route::get('/tlmaterials',[
       ]);
       Route::get('/icategories',[
         'uses' => 'SchoolController@getIcategory'
+      ]);
+      Route::get('/revenues',[
+        'uses' => 'SchoolController@getRevenues'
+      ]);
+       Route::get('/expenditures',[
+        'uses' => 'SchoolController@getExpenditures'
       ]);
       Route::get('/infrastructures',[
         'uses' => 'SchoolController@getInfrastructure'

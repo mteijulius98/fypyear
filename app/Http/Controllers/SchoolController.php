@@ -10,6 +10,7 @@ use App\Sownership;
 use App\Sdisability;
 use App\School;
 use App\Sclass;
+use App\Subject;
 use App\Icategory;
 use App\Tlmcategory;
 use App\Eqcategory;
@@ -21,6 +22,8 @@ use App\User;
 use App\Revenue;
 use App\Ntstaff;
 use App\Teacher;
+use App\Dreason;
+use App\Expenditure;
 use DB;
 class SchoolController extends Controller
    {
@@ -45,6 +48,18 @@ class SchoolController extends Controller
         $sdisability ->save();
         return response()->json(['sdisability'=>$sdisability], 201);
 
+    }
+    public function addDreason(Request $request){
+        $dreason = new Dreason();
+        $dreason ->reason = $request->input('reason');
+        $dreason ->save();
+        return response()->json(['dreason'=>$dreason], 201);
+    }
+    public function addSubject(Request $request){
+        $subject = new Subject();
+        $subject ->name= $request->input('name');
+        $subject ->save();
+        return response()->json(['subject'=>$subject], 201);
     }
     public function addClass(Request $request){
         $sclass = new Sclass();
@@ -104,6 +119,7 @@ public function addTlmaterial(Request $request){
         $tlmaterial ->tlmcategory_id = $request->input('tlmcategory_id');
         $tlmaterial ->sclass_id = $request->input('sclass_id');
         $tlmaterial ->available = $request->input('available');
+        $tlmaterial ->needed = $request->input('needed');
         $tlmaterial ->user_id=auth()->user()->id;
         $tlmaterial ->school_id=School::select('schools.id')
         ->join('school_user','schools.id', '=', 'school_user.school_id')
@@ -121,6 +137,7 @@ public function addTlmaterial(Request $request){
         $equipment ->eqcategory_id = $request->input('eqcategory_id');
         $equipment ->sclass_id = $request->input('sclass_id');
         $equipment ->available = $request->input('available');
+        $equipment ->needed = $request->input('needed');
         $equipment ->user_id=auth()->user()->id;
         $equipment ->school_id=School::select('schools.id')
         ->join('school_user','schools.id', '=', 'school_user.school_id')
@@ -163,6 +180,23 @@ public function addTlmaterial(Request $request){
         ->where('user_id','=',auth()->user()->id)->get()->first()->id;
         $revenue ->save();
         return response()->json(['revenue'=>$revenue], 201);
+    }
+      public function addExpenditure(Request $request){
+             if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
+        $expenditure = new Expenditure();
+        $expenditure ->name = $request->input('name');
+        $expenditure ->amount = $request->input('amount');
+        $expenditure ->kuanzia = $request->input('kuanzia');
+        $expenditure ->mpaka = $request->input('mpaka');
+        $expenditure ->revenue_id = $request->input('revenue_id');
+        $expenditure ->user_id=auth()->user()->id;
+        $expenditure ->school_id=School::select('schools.id')
+        ->join('school_user','schools.id', '=', 'school_user.school_id')
+        ->where('user_id','=',auth()->user()->id)->get()->first()->id;
+        $expenditure ->save();
+        return response()->json(['expenditure'=>$expenditure], 201);
     }
     public function addNtstaff(Request $request){
         if(! $user =JWTAuth::parseToken()->authenticate()){
@@ -239,6 +273,23 @@ public function getOwnership(){
      ];
     return response()->json($response, 200);
 }
+public function getRevenues(){
+    $revenues = Revenue::select('source','amount')
+    ->get();
+     $response = [
+         'revenues' => $revenues
+     ];
+    return response()->json($response, 200);
+}
+public function getExpenditures(){
+    $expenditures = Expenditure::select('name','amount')
+    ->get();
+     $response = [
+         'expenditures' => $expenditures
+     ];
+    return response()->json($response, 200);
+}
+
 public function getIcategory(){
     $icategories = Icategory::select('id','name')
     ->get();
@@ -272,7 +323,7 @@ public function getEqcategory(){
     return response()->json($response, 200);
 }
 public function getTeachers(){
-    $teachers = Teacher::select('id','fname','lname')
+    $teachers = Teacher::select('fname','lname')
     ->get();
      $response = [
          'teachers' => $teachers
@@ -280,7 +331,7 @@ public function getTeachers(){
     return response()->json($response, 200);
 }
 public function getNtstaffs(){
-    $ntstaffs = Ntstaff::select('id','designation','count')
+    $ntstaffs = Ntstaff::select('designation','count')
     ->get();
      $response = [
          'ntstaffs' => $ntstaffs
@@ -288,9 +339,9 @@ public function getNtstaffs(){
     return response()->json($response, 200);
 }
 public function getInfrastructure(){
-     if(! $user =JWTAuth::parseToken()->authenticate()){
-        return response()->json(['message'=>'user not found'],404);
-            }
+    //  if(! $user =JWTAuth::parseToken()->authenticate()){
+    //     return response()->json(['message'=>'user not found'],404);
+    //         }
    // if(auth()->user()->id == Infrastructure::select('user_id')
    //  ->get()){
 
@@ -305,13 +356,7 @@ public function getInfrastructure(){
    // }  
 }
 public function getTlm(){
-     // if(! $user =JWTAuth::parseToken()->authenticate()){
-     //    return response()->json(['message'=>'user not found'],404);
-     //        }
-   // if(auth()->user()->id == Infrastructure::select('user_id')
-   //  ->get()){
-
-    $tlmaterials =Tlmaterial::select('tlmaterials.name AS Name','tlmcategories.name AS category','available','sclasses.name AS ClassName')
+    $tlmaterials =Tlmaterial::select('tlmaterials.name AS Name','tlmcategories.name AS category','available','needed','sclasses.name AS ClassName')
     ->join('tlmcategories','tlmaterials.tlmcategory_id', '=', 'tlmcategories.id')
      ->join('sclasses','tlmaterials.sclass_id', '=', 'sclasses.id')
     ->get();
@@ -322,6 +367,19 @@ public function getTlm(){
     return response()->json($response, 200);
    // }  
 }
+public function getEquipments(){
+    $equipments =Equipment::select('equipment.name AS Name','eqcategories.name AS category','available','needed')
+    ->join('eqcategories','equipment.eqcategory_id', '=', 'eqcategories.id')
+    
+    ->get();
+
+     $response = [
+         'equipments' => $equipments
+     ];
+    return response()->json($response, 200);
+   // }  
+}
+
 
 
 }

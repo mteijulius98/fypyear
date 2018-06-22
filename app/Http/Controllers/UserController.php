@@ -86,6 +86,24 @@ class UserController extends Controller
         
         
 }
+ public function deleteUser($id)
+    {
+        $u = User::find($id);
+        $u ->delete();
+        return response()->json(['message'=> 'User deleted'], 200);
+    }
+      public function putUser(Request $request, $id){
+        $u = User::find($id);
+        if(!$u){
+            return response()->json(['message'=> 'User not found'], 404);
+        }
+        $u ->fname = $request->input('fname');
+        $u ->mname = $request->input('mname');
+        $u ->lname = $request->input('lname');
+        $u ->email = $request->input('email');
+        $u ->save();
+        return response()->json(['u'=>$u], 200);
+    }
 
 public function getUsers(){
     $users = User::select('fname','mname','lname','email')
@@ -98,36 +116,49 @@ public function getUsers(){
      ];
     return response()->json($response, 200);
    }
+  
    public function getDusers(){
-    $dusers=DB::table('users')->select('fname','lname','roles.roinitial','districts.dname')
+    $dusers=DB::table('district_user')->select('users.id','users.fname','users.lname','roles.roinitial','districts.dname')
+    ->join('users','district_user.user_id', '=', 'users.id')
     ->join('roles','users.role_id', '=', 'roles.id')
-     ->join('district_user', 'users.id', '=', 'district_user.user_id')
-      ->join('districts', 'users.id', '=', 'district_user.user_id')
-    ->where('role_id', '=', '2')
+     ->join('districts', 'district_user.district_id', '=', 'districts.id')
+      ->where('users.role_id', '=', '2')
     ->get();
      $response = [
          'dusers' => $dusers
      ];
     return response()->json($response, 200);
    }
-    public function getSusers(){
-    $susers=DB::table('users')->select('fname','lname','roles.roinitial','schools.name')
-    ->join('roles','users.role_id', '=', 'roles.id')
-    ->join('school_user', 'users.id', '=', 'school_user.user_id')
-    ->join('schools', 'users.id', '=', 'school_user.user_id')
-    ->where('role_id', '=', '3')
+   public function getSUsers(){
+     $susers=DB::table('school_user')->select('users.id','users.fname','users.lname','roles.roinitial','schools.name')
+     ->join('users','school_user.user_id', '=', 'users.id')
+     ->join('roles','users.role_id', '=', 'roles.id')
+      ->join('schools', 'school_user.school_id', '=', 'schools.id')
+     ->where('users.role_id', '=', '3')
     ->get();
      $response = [
          'susers' => $susers
      ];
     return response()->json($response, 200);
    }
+   // public function getWusers(){
+   //  $wusers=DB::table('users')->select('users.id','fname','lname','roles.roinitial','wards.wname')
+   //  ->join('roles','users.role_id', '=', 'roles.id')
+   //  ->join('user_ward', 'users.id', '=', 'user_ward.user_id')
+   //  ->join('wards', 'users.id', '=', 'user_ward.user_id')
+   //  ->where('role_id', '=', '4')
+   //  ->get();
+   //   $response = [
+   //       'wusers' => $wusers
+   //   ];
+   //  return response()->json($response, 200);
+   // }
    public function getWusers(){
-    $wusers=DB::table('users')->select('fname','lname','roles.roinitial','wards.wname')
-    ->join('roles','users.role_id', '=', 'roles.id')
-    ->join('user_ward', 'users.id', '=', 'user_ward.user_id')
-    ->join('wards', 'users.id', '=', 'user_ward.user_id')
-    ->where('role_id', '=', '4')
+     $wusers=DB::table('user_ward')->select('users.id','users.fname','users.lname','roles.roinitial','wards.wname')
+      ->join('users','user_ward.user_id', '=', 'users.id')
+     ->join('roles','users.role_id', '=', 'roles.id')
+      ->join('wards', 'user_ward.ward_id', '=', 'wards.id')
+      ->where('users.role_id', '=', '4')
     ->get();
      $response = [
          'wusers' => $wusers
