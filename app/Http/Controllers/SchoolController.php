@@ -9,7 +9,9 @@ use App\Scategory;
 use App\Sownership;
 use App\Sdisability;
 use App\School;
+use App\Sattendance;
 use App\Sclass;
+use App\Student;
 use App\Subject;
 use App\Icategory;
 use App\Tlmcategory;
@@ -232,7 +234,48 @@ $teacher ->school_id=School::select('schools.id')
 $teacher ->save();
 return response()->json(['teacher'=>$teacher], 201);
 }
-
+public function addStudent(Request $request){
+    if(! $user =JWTAuth::parseToken()->authenticate()){
+return response()->json(['message'=>'user not found'],404);
+   }
+$student = new Student();
+$student ->fname = $request->input('fname');
+$student ->mname = $request->input('mname');
+$student ->lname = $request->input('lname');
+$student ->sex = $request->input('sex');
+$student ->bdate = $request->input('bdate');
+$student ->anumber = $request->input('anumber');
+$student ->sclass_id = $request->input('sclass_id');
+$student ->status = $request->input('status');
+$student ->lstatus = $request->input('lstatus');
+$student ->orphan = $request->input('orphan');
+$student ->sdisability_id = $request->input('sdisability_id');
+$student ->nationality = $request->input('nationality');
+// $student ->year = $request->input('year');
+$student ->user_id=auth()->user()->id;
+$student ->school_id=School::select('schools.id')
+->join('school_user','schools.id', '=', 'school_user.school_id')
+->where('user_id','=',auth()->user()->id)->get()->first()->id;
+$student ->save();
+return response()->json(['student'=>$student], 201);
+}
+public function addSattendance(Request $request){
+    if(! $user =JWTAuth::parseToken()->authenticate()){
+return response()->json(['message'=>'user not found'],404);
+   }
+$sattendance = new Sattendance();
+$sattendance ->avmale = $request->input('avmale');
+$sattendance ->avfemale = $request->input('avfemale');
+$sattendance ->start_from = $request->input('start_from');
+$sattendance ->end_to = $request->input('end_to');
+$sattendance ->sclass_id = $request->input('sclass_id');
+$sattendance ->user_id=auth()->user()->id;
+$sattendance ->school_id=School::select('schools.id')
+->join('school_user','schools.id', '=', 'school_user.school_id')
+->where('user_id','=',auth()->user()->id)->get()->first()->id;
+$sattendance ->save();
+return response()->json(['sattendance'=>$sattendance], 201);
+}
     public function addSchool(Request $request){
         $school = new School();
         $school ->name = $request->input('name');
@@ -257,6 +300,115 @@ return response()->json(['teacher'=>$teacher], 201);
      ];
     return response()->json($response, 200);
     }
+
+    //  public function getSdata(){
+    //  $students=DB::table('students')->select(\DB::raw('TIMESTAMPDIFF(YEAR,students.bdate,CURDATE()) as age'),\DB::raw('count(*)  as female' ),'sclasses.name',\DB::raw('count(*)  as male' ))
+    //   // $students=DB::table('students')->count('*');
+    // ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
+    // ->where('students.sex', '=', 'F')
+    // ->orWhere('students.sex', '=', 'M')
+    // ->groupBy('age','sclasses.name','students.sex')
+    // ->get();
+    //  $response = [
+    //      'students' => $students
+    //  ];
+    // return response()->json($response, 200);
+    // }
+
+   public function getSdata(){
+     $students=DB::table('students')->select(\DB::raw('TIMESTAMPDIFF(YEAR,students.bdate,CURDATE()) as age'),\DB::raw('SUM(CASE
+WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
+WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'sclasses.name')
+      // $students=DB::table('students')->count('*');
+    ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
+    ->groupBy('age','sclasses.name')
+    ->get();
+     $response = [
+         'students' => $students
+     ];
+    return response()->json($response, 200);
+    }
+
+      public function getOrphan(){
+     $ostudents=DB::table('students')->select(\DB::raw('SUM(CASE
+WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
+WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'students.orphan','sclasses.name')
+      // $students=DB::table('students')->count('*');
+    ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
+    ->groupBy('sclasses.name','students.orphan')
+    ->get();
+     $response = [
+         'ostudents' => $ostudents
+     ];
+    return response()->json($response, 200);
+    }
+//       public function getSdrops(){
+//      $ostudents=DB::table('students')->select(\DB::raw('SUM(CASE
+// WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
+// WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),\DB::raw('SUM(CASE
+// WHEN dreasons.name="Mimba" THEN 1 ELSE 0 END) AS Mimba'),\DB::raw('SUM(CASE
+// WHEN dreasons.name="Utoro" THEN 1 ELSE 0 END) AS Utoro'),\DB::raw('SUM(CASE
+// WHEN dreasons.name="Utovu_wa_Nidhamu" THEN 1 ELSE 0 END) AS Utovu_wa_Nidhamu'),\DB::raw('SUM(CASE
+// WHEN dreasons.name="Kifo" THEN 1 ELSE 0 END) AS Kifo'),'sclasses.name')
+//       // $students=DB::table('students')->count('*');
+//     ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
+//      ->join('dreasons','students.dreason_id', '=', 'dreasons.id')
+//     ->groupBy('sclasses.name')
+//     ->get();
+//      $response = [
+//          'ostudents' => $ostudents
+//      ];
+//     return response()->json($response, 200);
+//     }
+    
+
+          public function getDstudents($id){
+             //$school = School::find($id);
+     $dstudents=DB::table('students')->select(\DB::raw('SUM(CASE
+WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
+WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'sdisabilities.name AS names','sclasses.name','school_id')
+     ->where('school_id','=',$id)
+      // $students=DB::table('students')->count('*');
+    ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
+     ->join('sdisabilities','students.sdisability_id', '=', 'sdisabilities.id')
+    ->groupBy('names','sclasses.name','school_id')
+
+    ->get();
+     $response = [
+         'dstudents' => $dstudents
+     ];
+    return response()->json($response, 200);
+    }
+//           public function getDstudents(){
+//              if(! $user =JWTAuth::parseToken()->authenticate()){
+// return response()->json(['message'=>'user not found'],404);
+//    }
+//              //$school = School::find($id);
+//      $dstudents=DB::table('students')->select(\DB::raw('SUM(CASE
+// WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
+// WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'sdisabilities.name AS names','sclasses.name','school_id')
+//       ->where('school_id','=',auth()->user()->school_id)
+//       // $students=DB::table('students')->count('*');
+//     ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
+//      ->join('sdisabilities','students.sdisability_id', '=', 'sdisabilities.id')
+//     ->groupBy('names','sclasses.name','school_id')
+    
+//     ->get();
+//      $response = [
+//          'dstudents' => $dstudents
+//      ];
+//     return response()->json($response, 200);
+//     }
+
+
+    public function getDisabilities(){
+    $sdisabilities = Sdisability::select('id','name')
+    ->get();
+     $response = [
+         'sdisabilities' => $sdisabilities
+     ];
+    return response()->json($response, 200);
+    }
  public function getCategory(){
     $categories = Scategory::select('id','name')
     ->get();
@@ -272,9 +424,13 @@ public function getOwnership(){
          'ownerships' => $ownerships
      ];
     return response()->json($response, 200);
-}
+     }
 public function getRevenues(){
+  if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
     $revenues = Revenue::select('source','amount')
+     ->where('user_id','=',auth()->user()->id)
     ->get();
      $response = [
          'revenues' => $revenues
@@ -282,7 +438,11 @@ public function getRevenues(){
     return response()->json($response, 200);
 }
 public function getExpenditures(){
+  if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
     $expenditures = Expenditure::select('name','amount')
+     ->where('user_id','=',auth()->user()->id)
     ->get();
      $response = [
          'expenditures' => $expenditures
@@ -323,15 +483,48 @@ public function getEqcategory(){
     return response()->json($response, 200);
 }
 public function getTeachers(){
+   if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
     $teachers = Teacher::select('fname','lname')
+     ->where('user_id','=',auth()->user()->id)
     ->get();
      $response = [
          'teachers' => $teachers
      ];
     return response()->json($response, 200);
 }
+public function getStudents(){
+      if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
+    $students = Student::select('fname','lname')
+    ->where('user_id','=',auth()->user()->id)
+    ->get();
+     $response = [
+         'students' => $students
+     ];
+    return response()->json($response, 200);
+}
+public function getSattendances(){
+   if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+      }
+    $sattendances=DB::table('sattendances')->select('avmale','avfemale','start_from','end_to','sclasses.name')
+ ->join('sclasses','sattendances.sclass_id', '=', 'sclasses.id')
+  ->where('user_id','=',auth()->user()->id)
+    ->get();
+     $response = [
+         'sattendances' => $sattendances
+     ];
+    return response()->json($response, 200);
+}
 public function getNtstaffs(){
+  if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+      }
     $ntstaffs = Ntstaff::select('designation','count')
+     ->where('user_id','=',auth()->user()->id)
     ->get();
      $response = [
          'ntstaffs' => $ntstaffs
@@ -339,14 +532,16 @@ public function getNtstaffs(){
     return response()->json($response, 200);
 }
 public function getInfrastructure(){
-    //  if(! $user =JWTAuth::parseToken()->authenticate()){
-    //     return response()->json(['message'=>'user not found'],404);
-    //         }
+     if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
    // if(auth()->user()->id == Infrastructure::select('user_id')
    //  ->get()){
 
     $infrastructures =Infrastructure::select('infrastructures.name AS Name','icategories.name AS category','available','needed')
+
     ->join('icategories','infrastructures.icategory_id', '=', 'icategories.id')
+     ->where('user_id','=',auth()->user()->id)
     ->get();
 
      $response = [
@@ -356,10 +551,14 @@ public function getInfrastructure(){
    // }  
 }
 public function getTlm(){
+  if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
     $tlmaterials =Tlmaterial::select('tlmaterials.name AS Name','tlmcategories.name AS category','available','needed','sclasses.name AS ClassName')
     ->join('tlmcategories','tlmaterials.tlmcategory_id', '=', 'tlmcategories.id')
      ->join('sclasses','tlmaterials.sclass_id', '=', 'sclasses.id')
-    ->get();
+       ->where('user_id','=',auth()->user()->id)
+       ->get();
 
      $response = [
          'tlmaterials' => $tlmaterials
@@ -368,16 +567,19 @@ public function getTlm(){
    // }  
 }
 public function getEquipments(){
+  if(! $user =JWTAuth::parseToken()->authenticate()){
+        return response()->json(['message'=>'user not found'],404);
+            }
     $equipments =Equipment::select('equipment.name AS Name','eqcategories.name AS category','available','needed')
     ->join('eqcategories','equipment.eqcategory_id', '=', 'eqcategories.id')
-    
+    ->where('user_id','=',auth()->user()->id)
     ->get();
 
      $response = [
          'equipments' => $equipments
      ];
     return response()->json($response, 200);
-   // }  
+  
 }
 
 

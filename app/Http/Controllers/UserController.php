@@ -33,10 +33,10 @@ class UserController extends Controller
 
     $user=User::find($u->id);
     if($user->role->roinitial=='deo' || $user->role->roinitial=='slo'){
-        $user->districts()->attach($request->input('district_id'));
+        $user->districts()->attach($request->input('station_id'));
     }
     elseif($user->role->roinitial=='weo'){
-        $user->wards()->attach($request->input('ward_id'));
+        $user->wards()->attach($request->input('station_id'));
     }
     elseif($user->role->roinitial=='hos'){
         $user->schools()->attach($request->input('school_id'));
@@ -45,11 +45,6 @@ class UserController extends Controller
  
     return response()->json([ 'message'=> 'User succsessfully created'],201);
    }
-//    public function __construct()
-//    {
-//        $this->user =new User;
-//        $this->duser =new Duser;
-//    }
    public function signin(Request $request){
     $this->validate($request,[
         'email'=> 'required|email',
@@ -123,6 +118,7 @@ public function getUsers(){
     ->join('roles','users.role_id', '=', 'roles.id')
      ->join('districts', 'district_user.district_id', '=', 'districts.id')
       ->where('users.role_id', '=', '2')
+      ->orWhere('users.role_id', '=', '5')
     ->get();
      $response = [
          'dusers' => $dusers
@@ -130,7 +126,7 @@ public function getUsers(){
     return response()->json($response, 200);
    }
    public function getSUsers(){
-     $susers=DB::table('school_user')->select('users.id','users.fname','users.lname','roles.roinitial','schools.name')
+     $susers=DB::table('school_user')->select('users.id','users.fname','users.lname','roles.roinitial','schools.name','schools.regno')
      ->join('users','school_user.user_id', '=', 'users.id')
      ->join('roles','users.role_id', '=', 'roles.id')
       ->join('schools', 'school_user.school_id', '=', 'schools.id')
@@ -142,7 +138,7 @@ public function getUsers(){
     return response()->json($response, 200);
    }
    // public function getWusers(){
-   //  $wusers=DB::table('users')->select('users.id','fname','lname','roles.roinitial','wards.wname')
+   //  $wusers=DB::table('users')->select('users.id','users.fname','users.lname','roles.roinitial','wards.wname')
    //  ->join('roles','users.role_id', '=', 'roles.id')
    //  ->join('user_ward', 'users.id', '=', 'user_ward.user_id')
    //  ->join('wards', 'users.id', '=', 'user_ward.user_id')
@@ -153,6 +149,7 @@ public function getUsers(){
    //   ];
    //  return response()->json($response, 200);
    // }
+
    public function getWusers(){
      $wusers=DB::table('user_ward')->select('users.id','users.fname','users.lname','roles.roinitial','wards.wname')
       ->join('users','user_ward.user_id', '=', 'users.id')
@@ -165,6 +162,7 @@ public function getUsers(){
      ];
     return response()->json($response, 200);
    }
+
 // public function getUsers(){
 //     $users=DB::table('users')->select('fname','mname','lname','email','roles.roname','regions.rname','districts.dname','wards.wname')
 //     ->join('regions', 'users.region_id', '=', 'regions.id')

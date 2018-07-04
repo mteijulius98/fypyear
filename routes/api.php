@@ -19,6 +19,26 @@ Route::post('/district',[
     'uses' => 'DistrictController@postDistrict'
 
     ]);
+Route::get('/swards',[
+    'uses' => 'WardController@getWschools'
+
+    ]);
+Route::get('/sorphans',[
+    'uses' => 'SchoolController@getOrphan'
+
+    ]);
+Route::get('/sdrops',[
+    'uses' => 'SchoolController@getSdrops'
+
+    ]);
+Route::get('/sdisables/{id}',[
+    'uses' => 'SchoolController@getDstudents'
+
+    ]);
+Route::get('/sdatas',[
+    'uses' => 'SchoolController@getSdata'
+
+    ]);
 Route::delete('/role/{id}',[
     'uses' => 'RoleController@deleteRole'
 
@@ -93,6 +113,9 @@ Route::post('/ownership',[
  Route::post('/disability',[
         'uses' => 'SchoolController@addDisability'
       ]);
+ Route::get('/disabilities',[
+        'uses' => 'SchoolController@getDisabilities'
+      ]);
 Route::post('/reason',[
         'uses' => 'SchoolController@addDreason'
       ]);
@@ -128,32 +151,43 @@ Route::post('/expenditure',[
 Route::get('/tlmaterials',[
         'uses' => 'SchoolController@getTlm'
       ]);
-      Route::post('/equipment',[
+Route::post('/equipment',[
         'uses' => 'SchoolController@addEquipment'
       ]);
-      Route::post('/service',[
+Route::post('/service',[
         'uses' => 'SchoolController@addService'
       ]);
-
-      Route::post('/eqcategory',[
+Route::post('/student',[
+        'uses' => 'SchoolController@addStudent'
+      ]);
+Route::get('/students',[
+        'uses' => 'SchoolController@getStudents'
+      ]);
+Route::get('/attendances',[
+        'uses' => 'SchoolController@getSattendances'
+      ]);
+Route::post('/attendance',[
+        'uses' => 'SchoolController@addSattendance'
+      ]);
+Route::post('/eqcategory',[
         'uses' => 'SchoolController@addEqcategory'
       ]);
-      Route::get('/eqcategories',[
+Route::get('/eqcategories',[
         'uses' => 'SchoolController@getEqcategory'
       ]);
-      Route::post('/infrastructure',[
+Route::post('/infrastructure',[
         'uses' => 'SchoolController@addInfrastructure'
       ]);
-      Route::get('/icategories',[
+Route::get('/icategories',[
         'uses' => 'SchoolController@getIcategory'
       ]);
-      Route::get('/revenues',[
+Route::get('/revenues',[
         'uses' => 'SchoolController@getRevenues'
       ]);
-       Route::get('/expenditures',[
+Route::get('/expenditures',[
         'uses' => 'SchoolController@getExpenditures'
       ]);
-      Route::get('/infrastructures',[
+Route::get('/infrastructures',[
         'uses' => 'SchoolController@getInfrastructure'
       ]);
 Route::post('/revenue',[
