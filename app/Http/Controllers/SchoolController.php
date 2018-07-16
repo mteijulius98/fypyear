@@ -227,6 +227,7 @@ $teacher ->birth = $request->input('birth');
 $teacher ->edlevel = $request->input('edlevel');
 $teacher ->epdate = $request->input('epdate');
 $teacher ->epid = $request->input('epid');
+$teacher ->comb = $request->input('comb');
 $teacher ->user_id=auth()->user()->id;
 $teacher ->school_id=School::select('schools.id')
 ->join('school_user','schools.id', '=', 'school_user.school_id')
@@ -291,6 +292,24 @@ return response()->json(['sattendance'=>$sattendance], 201);
         return response()->json(['school'=>$school], 201);
 
     }
+
+          public function putSchool(Request $request, $id){
+        $school = School::find($id);
+        if(!$school){
+            return response()->json(['message'=> 'User not found'], 404);
+        }
+        $school ->name = $request->input('name');
+        $school ->regno = $request->input('regno');
+        $school ->regdate = $request->input('regdate');
+        $school ->postal_address = $request->input('postal_address');
+        $school ->email = $request->input('email');
+        $school ->phone_number = $request->input('phone_number');
+        $school ->ward_id = $request->input('ward_id');
+        $school ->sownership_id = $request->input('sownership_id');
+        $school ->scategory_id = $request->input('scategory_id');
+        $school ->save();
+        return response()->json(['school'=>$school], 200);
+    }
     public function getSchools(){
     $schools=DB::table('schools')->select('name','regno','wards.wname')
     ->join('wards','schools.ward_id', '=', 'wards.id')
@@ -314,12 +333,24 @@ return response()->json(['sattendance'=>$sattendance], 201);
     //  ];
     // return response()->json($response, 200);
     // }
+    public function bUpdate($id){
+         $students=DB::table('students')
+            ->where('user_id','=',$id)
+            ->update(['weo_view' => 1]);
+    }
+    public function dUpdate($id){
+         $students=DB::table('students')
+            ->where('user_id','=',$id)
+            ->update(['weo_view' => 0]);
+    }
 
-   public function getSdata(){
+
+   public function getSdata($id){
      $students=DB::table('students')->select(\DB::raw('TIMESTAMPDIFF(YEAR,students.bdate,CURDATE()) as age'),\DB::raw('SUM(CASE
 WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
-WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'sclasses.name')
+WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),\DB::raw('COUNT(TIMESTAMPDIFF(YEAR,students.bdate,CURDATE())) AS TOTAL'),'sclasses.name')
       // $students=DB::table('students')->count('*');
+     ->where('school_id','=',$id)
     ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
     ->groupBy('age','sclasses.name')
     ->get();
@@ -328,12 +359,25 @@ WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'sclasses.name')
      ];
     return response()->json($response, 200);
     }
+    public function getTech($id){
+      $teachs=DB::table('teachers')->select(\DB::raw('SUM(CASE
+WHEN teachers.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
+WHEN teachers.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'teachers.comb',\DB::raw('COUNT(teachers.comb) AS TOTAL'))
+       ->where('school_id','=',$id)
+        ->groupBy('teachers.comb')
+         ->get();
+     $response = [
+         'teachs' => $teachs
+     ];
+    return response()->json($response, 200);
+    }
 
-      public function getOrphan(){
+      public function getOrphan($id){
      $ostudents=DB::table('students')->select(\DB::raw('SUM(CASE
 WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
-WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'students.orphan','sclasses.name')
+WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'students.orphan','sclasses.name',\DB::raw('COUNT(students.orphan) AS TOTAL'))
       // $students=DB::table('students')->count('*');
+    ->where('school_id','=',$id)
     ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
     ->groupBy('sclasses.name','students.orphan')
     ->get();
@@ -342,31 +386,24 @@ WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'students.orphan','sclasse
      ];
     return response()->json($response, 200);
     }
-//       public function getSdrops(){
-//      $ostudents=DB::table('students')->select(\DB::raw('SUM(CASE
-// WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
-// WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),\DB::raw('SUM(CASE
-// WHEN dreasons.name="Mimba" THEN 1 ELSE 0 END) AS Mimba'),\DB::raw('SUM(CASE
-// WHEN dreasons.name="Utoro" THEN 1 ELSE 0 END) AS Utoro'),\DB::raw('SUM(CASE
-// WHEN dreasons.name="Utovu_wa_Nidhamu" THEN 1 ELSE 0 END) AS Utovu_wa_Nidhamu'),\DB::raw('SUM(CASE
-// WHEN dreasons.name="Kifo" THEN 1 ELSE 0 END) AS Kifo'),'sclasses.name')
-//       // $students=DB::table('students')->count('*');
-//     ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
-//      ->join('dreasons','students.dreason_id', '=', 'dreasons.id')
-//     ->groupBy('sclasses.name')
-//     ->get();
-//      $response = [
-//          'ostudents' => $ostudents
-//      ];
-//     return response()->json($response, 200);
-//     }
-    
+    public function totalStudents($id){
+        $tstudents=DB::table('students')->select(\DB::raw('SUM(CASE
+WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
+WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'))
+         ->where('school_id','=',$id)
+         ->get();
+         $response = [
+         'tstudents' => $tstudents
+     ];
+    return response()->json($response, 200);
+    }
+ 
 
           public function getDstudents($id){
              //$school = School::find($id);
      $dstudents=DB::table('students')->select(\DB::raw('SUM(CASE
 WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
-WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'sdisabilities.name AS names','sclasses.name','school_id')
+WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'sdisabilities.name AS names','sclasses.name','school_id',\DB::raw('COUNT(sdisabilities.name) AS TOTAL'))
      ->where('school_id','=',$id)
       // $students=DB::table('students')->count('*');
     ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
@@ -379,28 +416,71 @@ WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'sdisabilities.name AS nam
      ];
     return response()->json($response, 200);
     }
-//           public function getDstudents(){
-//              if(! $user =JWTAuth::parseToken()->authenticate()){
-// return response()->json(['message'=>'user not found'],404);
-//    }
-//              //$school = School::find($id);
-//      $dstudents=DB::table('students')->select(\DB::raw('SUM(CASE
-// WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
-// WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'sdisabilities.name AS names','sclasses.name','school_id')
-//       ->where('school_id','=',auth()->user()->school_id)
-//       // $students=DB::table('students')->count('*');
-//     ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
-//      ->join('sdisabilities','students.sdisability_id', '=', 'sdisabilities.id')
-//     ->groupBy('names','sclasses.name','school_id')
+    public function getWinfo($id){
+      $infos=DB::table('students')->select(\DB::raw('SUM(CASE
+WHEN students.sex="M" THEN 1 ELSE 0 END) AS MALES'),\DB::raw('SUM(CASE
+WHEN students.sex="F" THEN 1 ELSE 0 END) AS FEMALES'),'sclasses.name')
+   ->join('sclasses','students.sclass_id', '=', 'sclasses.id') 
+   ->join('schools', 'students.school_id', '=', 'schools.id')
+   ->join('wards', 'schools.ward_id', '=', 'wards.id')
+    ->where('ward_id','=',$id)
+     ->groupBy('sclasses.name')
+       ->get();
+     $response = [
+         'infos' => $infos
+     ];
+    return response()->json($response, 200);
+    }
+    public function  getWdis($id){
+        $wdis=DB::table('students')->select('sdisabilities.name AS names',\DB::raw('COUNT(sdisabilities.name) AS TOTAL'))
+   ->join('sclasses','students.sclass_id', '=', 'sclasses.id')
+   ->join('sdisabilities','students.sdisability_id', '=', 'sdisabilities.id') 
+   ->join('schools', 'students.school_id', '=', 'schools.id')
+   ->join('wards', 'schools.ward_id', '=', 'wards.id')
+    ->where('ward_id','=',$id)
+     ->groupBy('names')
+       ->get();
+     $response = [
+         'wdis' => $wdis
+     ];
+    return response()->json($response, 200);  
+    }
     
-//     ->get();
-//      $response = [
-//          'dstudents' => $dstudents
-//      ];
-//     return response()->json($response, 200);
-//     }
+        public function  getWteachers($id){
+        $wteachers=DB::table('teachers')->select('teachers.comb AS Combination',\DB::raw('COUNT(teachers.comb) AS TOTAL')) 
+   ->join('schools', 'teachers.school_id', '=', 'schools.id')
+   ->join('wards', 'schools.ward_id', '=', 'wards.id')
+    ->where('ward_id','=',$id)
+     ->groupBy('Combination')
+       ->get();
+     $response = [
+         'wteachers' => $wteachers
+     ];
+    return response()->json($response, 200);  
+    }
+         public function  getSpeSchool($id){
+        $schools=DB::table('schools')->select('schools.name') 
+       ->where('id','=',$id)
+       ->get();
+      $response = [
+         'schools' => $schools
+       ];
+     return response()->json($response, 200);  
+      }
 
+    public function getInfa($id){
+         $infras =Infrastructure::select('infrastructures.name AS Name','icategories.name AS category','available','needed')
 
+    ->join('icategories','infrastructures.icategory_id', '=', 'icategories.id')
+     ->where('school_id','=',$id)
+    ->get();
+
+     $response = [
+         'infras' => $infras
+     ];
+    return response()->json($response, 200);
+    }
+    
     public function getDisabilities(){
     $sdisabilities = Sdisability::select('id','name')
     ->get();
@@ -488,6 +568,9 @@ public function getTeachers(){
             }
     $teachers = Teacher::select('fname','lname')
      ->where('user_id','=',auth()->user()->id)
+     // ->orderBy('fname')
+     ->latest('fname','desc')
+     ->first()
     ->get();
      $response = [
          'teachers' => $teachers
@@ -498,7 +581,8 @@ public function getStudents(){
       if(! $user =JWTAuth::parseToken()->authenticate()){
         return response()->json(['message'=>'user not found'],404);
             }
-    $students = Student::select('fname','lname')
+    $students = Student::select('fname','lname','sclasses.name')
+    ->join('sclasses', 'students.sclass_id', '=', 'sclasses.id')
     ->where('user_id','=',auth()->user()->id)
     ->get();
      $response = [

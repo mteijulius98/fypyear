@@ -19,11 +19,68 @@ Route::post('/district',[
     'uses' => 'DistrictController@postDistrict'
 
     ]);
+Route::get('/dtechs/{id}',[
+    'uses' => 'DistrictController@getDteachers'
+
+    ]);
+Route::get('/total/{id}',[
+    'uses' => 'SchoolController@totalStudents'
+
+    ]);
+Route::get('/ddis/{id}',[
+    'uses' => 'DistrictController@getDdis'
+
+    ]);
+Route::get('/dinfos/{id}',[
+    'uses' => 'DistrictController@getDinfo'
+
+    ]);
+Route::get('/spesch/{id}',[
+    'uses' => 'SchoolController@getSpeSchool'
+
+    ]);
+  
+
+Route::get('/bUpdate/{id}',[
+    'uses' => 'SchoolController@bUpdate'
+
+    ]);
+Route::get('/techs/{id}',[
+    'uses' => 'SchoolController@getTech'
+
+    ]);
+Route::get('/wardis/{id}',[
+    'uses' => 'SchoolController@getWdis'
+
+    ]);
+Route::get('/wardteach/{id}',[
+    'uses' => 'SchoolController@getWteachers'
+
+    ]);
+Route::get('/infas/{id}',[
+    'uses' => 'SchoolController@getInfa'
+
+    ]);
+Route::get('/infos/{id}',[
+    'uses' => 'SchoolController@getWinfo'
+
+    ]);
+Route::get('/dUpdate/{id}',[
+    'uses' => 'SchoolController@dUpdate'
+
+    ]);
 Route::get('/swards',[
     'uses' => 'WardController@getWschools'
 
     ]);
-Route::get('/sorphans',[
+Route::get('/ws/{id}',[
+    'uses' => 'DistrictController@getWs'
+    ]);
+Route::get('/dwards/{id}',[
+    'uses' => 'DistrictController@getDwards'
+
+    ]);
+Route::get('/sorphans/{id}',[
     'uses' => 'SchoolController@getOrphan'
 
     ]);
@@ -35,7 +92,7 @@ Route::get('/sdisables/{id}',[
     'uses' => 'SchoolController@getDstudents'
 
     ]);
-Route::get('/sdatas',[
+Route::get('/sdatas/{id}',[
     'uses' => 'SchoolController@getSdata'
 
     ]);
@@ -54,6 +111,10 @@ Route::put('/role/{id}',[
     ]);
 Route::post('/school',[
   'uses' => 'SchoolController@addSchool'
+    
+        ]);
+Route::put('/school/{id}',[
+  'uses' => 'SchoolController@putSchool'
     
         ]);
 Route::get('/schools',[

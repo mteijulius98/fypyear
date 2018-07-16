@@ -74,8 +74,22 @@ class UserController extends Controller
                   $role1=$role->roinitial;
 
               }
-
-    return response()->json(['token'=> $token,'roinitial'=>$role1],200);
+      $user_station=DB::table('district_user')->select('district_id')
+      ->join('users','district_user.user_id', '=', 'users.id')
+      ->where('email', '=',$request->email)->get();
+      $district1='';
+      foreach ($user_station as  $the_id) {
+        $district1=$the_id->district_id;
+      }
+       $user_weo=DB::table('user_ward')->select('ward_id')
+      ->join('users','user_ward.user_id', '=', 'users.id')
+      ->where('email', '=',$request->email)->get();
+      $ward1='';
+      foreach ($user_weo as  $the_wid) {
+        $ward1=$the_wid->ward_id;
+      }
+       
+    return response()->json(['token'=> $token,'roinitial'=>$role1, 'district_id'=>$district1,'ward_id'=>$ward1],200);
 
        
         
@@ -105,6 +119,7 @@ public function getUsers(){
     ->where('role_id','=','2')
      ->orWhere('role_id','=','3')
      ->orWhere('role_id','=','4')
+     ->orWhere('role_id','=','5')
     ->get();
      $response = [
          'users' => $users
